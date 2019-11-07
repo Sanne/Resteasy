@@ -9,7 +9,7 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.ws.rs.core.MultivaluedMap;
@@ -43,7 +43,7 @@ public class ResteasyUriInfo implements UriInfo
    private URI baseURI;
    private List<String> matchedUris;
    private List<String> encodedMatchedUris;
-   private List<String> encodedMatchedPaths = new LinkedList<String>();
+   private List<String> encodedMatchedPaths;
    private List<Object> ancestors;
    private String absoluteString;
    private String contextPath;
@@ -454,12 +454,12 @@ public class ResteasyUriInfo implements UriInfo
    {
       if (decode)
       {
-         if (matchedUris == null) matchedUris = new LinkedList<String>();
+         if (matchedUris == null) return Collections.EMPTY_LIST;
          return matchedUris;
       }
       else
       {
-         if (encodedMatchedUris == null) encodedMatchedUris = new LinkedList<String>();
+         if (encodedMatchedUris == null) return Collections.EMPTY_LIST;
          return encodedMatchedUris;
       }
    }
@@ -471,30 +471,31 @@ public class ResteasyUriInfo implements UriInfo
 
    public List<Object> getMatchedResources()
    {
-      if (ancestors == null) ancestors = new LinkedList<Object>();
+      if (ancestors == null) return Collections.EMPTY_LIST;
       return ancestors;
    }
 
 
    public void pushCurrentResource(Object resource)
    {
-      if (ancestors == null) ancestors = new LinkedList<Object>();
+      if (ancestors == null) ancestors = new ArrayList<>(3);
       ancestors.add(0, resource);
    }
 
    public void pushMatchedPath(String encoded)
    {
+      if (encodedMatchedPaths == null) encodedMatchedPaths = new ArrayList<>(3);
       encodedMatchedPaths.add(0, encoded);
    }
 
    public List<String> getEncodedMatchedPaths()
    {
-      return encodedMatchedPaths;
+      return encodedMatchedPaths == null ? Collections.EMPTY_LIST : encodedMatchedPaths;
    }
 
    public void popMatchedPath()
    {
-      encodedMatchedPaths.remove(0);
+      if (encodedMatchedPaths!=null) encodedMatchedPaths.remove(0);
    }
 
 
@@ -504,10 +505,10 @@ public class ResteasyUriInfo implements UriInfo
       int end = (encoded.endsWith("/")) ? encoded.length() - 1 : encoded.length();
       encoded = start < end ? encoded.substring(start, end) : "";
       String decoded = Encode.decode(encoded);
-      if (encodedMatchedUris == null) encodedMatchedUris = new LinkedList<String>();
+      if (encodedMatchedUris == null) encodedMatchedUris = new ArrayList<>(3);
       encodedMatchedUris.add(0, encoded);
 
-      if (matchedUris == null) matchedUris = new LinkedList<String>();
+      if (matchedUris == null) matchedUris = new ArrayList<>(3);
       matchedUris.add(0, decoded);
    }
 
